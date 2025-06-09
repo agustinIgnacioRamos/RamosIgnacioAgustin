@@ -1,0 +1,16 @@
+.equipo-container {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+
+.card {
+    background-color: #f0f0f0;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    padding: 16px;
+    width: 200px;
+}
+

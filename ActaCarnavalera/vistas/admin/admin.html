@@ -1,163 +1,189 @@
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="dark">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Panel Administrador</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-</head>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+  </head>
 
-<body class="bg-dark min-vh-100">
-    
-    
-    <div class="position-fixed top-0 end-0 p-3 p-md-4" style="z-index: 1050;">
-        <button class="btn btn-danger btn-lg shadow-lg" onclick="cerrarSesion()">
-            <i class="bi bi-box-arrow-right me-2"></i>
-            <span class="d-none d-sm-inline">Cerrar Sesión</span>
-            <span class="d-inline d-sm-none">Salir</span>
-        </button>
+  <body class="bg-dark min-vh-100">
+    <div class="position-fixed top-0 end-0 p-3 p-md-4" style="z-index: 1050">
+      <button class="btn btn-danger btn-lg shadow-lg" onclick="cerrarSesion()">
+        <i class="bi bi-box-arrow-right me-2"></i>
+        <span class="d-none d-sm-inline">Cerrar Sesión</span>
+        <span class="d-inline d-sm-none">Salir</span>
+      </button>
     </div>
 
     <div class="container py-4 py-md-5">
-        
-        
-        <div class="row mb-4 mb-md-5">
-            <div class="col-12">
-                <div class="card bg-gradient border-primary shadow-lg">
-                    <div class="card-body text-center py-4 py-md-5">
-                        <div class="mb-3">
-                            <i class="bi bi-speedometer2 display-1 text-primary"></i>
-                        </div>
-                        <h1 class="display-4 fw-bold text-white mb-3">
-                            Panel de Administración
-                        </h1>
-                        <p class="lead text-white-50 mb-4">
-                            Gestiona todos los aspectos del sistema
-                        </p>
-                        <div class="d-inline-flex align-items-center gap-2 bg-dark bg-opacity-50 px-4 py-2 rounded-pill">
-                            <i class="bi bi-person-circle fs-5 text-primary"></i>
-                            <span class="text-white fw-semibold">Administrador</span>
-                        </div>
-                    </div>
+      <div class="row mb-4 mb-md-5">
+        <div class="col-12">
+          <div class="card bg-gradient border-primary shadow-lg">
+            <div class="card-body text-center py-4 py-md-5">
+              <div class="mb-3">
+                <i class="bi bi-speedometer2 display-1 text-primary"></i>
+              </div>
+              <h1 class="display-4 fw-bold text-white mb-3">
+                Panel de Administración
+              </h1>
+              <p class="lead text-white-50 mb-4">
+                Gestiona todos los aspectos del sistema
+              </p>
+              <div
+                class="d-inline-flex align-items-center gap-2 bg-dark bg-opacity-50 px-4 py-2 rounded-pill"
+              >
+                <i class="bi bi-person-circle fs-5 text-primary"></i>
+                <span class="text-white fw-semibold">Administrador</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="admin-usuario.php" class="text-decoration-none">
+            <div class="card bg-dark border-secondary shadow-lg h-100">
+              <div class="card-body text-center p-4">
+                <div class="mb-4">
+                  <div
+                    class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 100px; height: 100px"
+                  >
+                    <i class="bi bi-people-fill display-3 text-white"></i>
+                  </div>
                 </div>
+                <h5 class="card-title text-white fw-bold mb-2">Usuarios</h5>
+                <p class="card-text text-white-50 mb-0">
+                  Gestiona usuarios del sistema
+                </p>
+              </div>
             </div>
+          </a>
         </div>
 
-        
-        <div class="row g-4">
-            
-            
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="admin-usuario.php" class="text-decoration-none">
-                    <div class="card bg-dark border-secondary shadow-lg h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="mb-4">
-                                <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center" 
-                                     style="width: 100px; height: 100px;">
-                                    <i class="bi bi-people-fill display-3 text-white"></i>
-                                </div>
-                            </div>
-                            <h5 class="card-title text-white fw-bold mb-2">Usuarios</h5>
-                            <p class="card-text text-white-50 mb-0">
-                                Gestiona usuarios del sistema
-                            </p>
-                        </div>
-                    </div>
-                </a>
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="admin-comparsa.php" class="text-decoration-none">
+            <div class="card bg-dark border-secondary shadow-lg h-100">
+              <div class="card-body text-center p-4">
+                <div class="mb-4">
+                  <div
+                    class="bg-info bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 100px; height: 100px"
+                  >
+                    <i class="bi bi-music-note-list display-3 text-white"></i>
+                  </div>
+                </div>
+                <h5 class="card-title text-white fw-bold mb-2">Comparsas</h5>
+                <p class="card-text text-white-50 mb-0">
+                  Administra las comparsas participantes
+                </p>
+              </div>
             </div>
-
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="admin-comparsa.php" class="text-decoration-none">
-                    <div class="card bg-dark border-secondary shadow-lg h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="mb-4">
-                                <div class="bg-info bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center" 
-                                     style="width: 100px; height: 100px;">
-                                    <i class="bi bi-music-note-list display-3 text-white"></i>
-                                </div>
-                            </div>
-                            <h5 class="card-title text-white fw-bold mb-2">Comparsas</h5>
-                            <p class="card-text text-white-50 mb-0">
-                                Administra las comparsas participantes
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="admin-noche.php" class="text-decoration-none">
-                    <div class="card bg-dark border-secondary shadow-lg h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="mb-4">
-                                <div class="bg-warning bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center" 
-                                     style="width: 100px; height: 100px;">
-                                    <i class="bi bi-moon-stars-fill display-3 text-white"></i>
-                                </div>
-                            </div>
-                            <h5 class="card-title text-white fw-bold mb-2">Noches</h5>
-                            <p class="card-text text-white-50 mb-0">
-                                Configura las noches del carnaval
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="admin-categoria.php" class="text-decoration-none">
-                    <div class="card bg-dark border-secondary shadow-lg h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="mb-4">
-                                <div class="bg-danger bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center" 
-                                     style="width: 100px; height: 100px;">
-                                    <i class="bi bi-tags-fill display-3 text-white"></i>
-                                </div>
-                            </div>
-                            <h5 class="card-title text-white fw-bold mb-2">Categorías</h5>
-                            <p class="card-text text-white-50 mb-0">
-                                Gestiona categorías de evaluación
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-           
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="admin-puntaje.php" class="text-decoration-none">
-                    <div class="card bg-dark border-secondary shadow-lg h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="mb-4">
-                                <div class="bg-success bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center" 
-                                     style="width: 100px; height: 100px;">
-                                    <i class="bi bi-star-fill display-3 text-white"></i>
-                                </div>
-                            </div>
-                            <h5 class="card-title text-white fw-bold mb-2">Puntajes</h5>
-                            <p class="card-text text-white-50 mb-0">
-                                Administra los puntajes asignados
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
+          </a>
         </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="admin-noche.php" class="text-decoration-none">
+            <div class="card bg-dark border-secondary shadow-lg h-100">
+              <div class="card-body text-center p-4">
+                <div class="mb-4">
+                  <div
+                    class="bg-warning bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 100px; height: 100px"
+                  >
+                    <i class="bi bi-moon-stars-fill display-3 text-white"></i>
+                  </div>
+                </div>
+                <h5 class="card-title text-white fw-bold mb-2">Noches</h5>
+                <p class="card-text text-white-50 mb-0">
+                  Configura las noches del carnaval
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="admin-categoria.php" class="text-decoration-none">
+            <div class="card bg-dark border-secondary shadow-lg h-100">
+              <div class="card-body text-center p-4">
+                <div class="mb-4">
+                  <div
+                    class="bg-danger bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 100px; height: 100px"
+                  >
+                    <i class="bi bi-tags-fill display-3 text-white"></i>
+                  </div>
+                </div>
+                <h5 class="card-title text-white fw-bold mb-2">Categorías</h5>
+                <p class="card-text text-white-50 mb-0">
+                  Gestiona categorías de evaluación
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="admin-puntaje.php" class="text-decoration-none">
+            <div class="card bg-dark border-secondary shadow-lg h-100">
+              <div class="card-body text-center p-4">
+                <div class="mb-4">
+                  <div
+                    class="bg-success bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 100px; height: 100px"
+                  >
+                    <i class="bi bi-star-fill display-3 text-white"></i>
+                  </div>
+                </div>
+                <h5 class="card-title text-white fw-bold mb-2">Puntajes</h5>
+                <p class="card-text text-white-50 mb-0">
+                  Administra los puntajes asignados
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a href="admin-revision.php" class="text-decoration-none">
+            <div class="card bg-dark border-secondary shadow-lg h-100">
+              <div class="card-body text-center p-4">
+                <div class="mb-4">
+                  <div
+                    class="bg-secondary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 100px; height: 100px"
+                  >
+                    <i class="bi bi-check2-square display-3 text-white"></i>
+                  </div>
+                </div>
+                <h5 class="card-title text-white fw-bold mb-2">Revisión</h5>
+                <p class="card-text text-white-50 mb-0">
+                  Revisar y aprobar evaluaciones
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function cerrarSesion() {
-            if (confirm('¿Cerrar sesión?')) {
-                window.location.href = '../../backend/logout.php';
-            }
+      function cerrarSesion() {
+        if (confirm("¿Cerrar sesión?")) {
+          window.location.href = "../../backend/logout.php";
         }
+      }
     </script>
-</body>
-
+  </body>
 </html>

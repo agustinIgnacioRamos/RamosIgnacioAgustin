@@ -1,242 +1,351 @@
 <?php
-require_once "Database.php";
+session_start();
+require_once "../../clases/Puntaje.php";
+$puntaje = new Puntaje();
 
-class Puntaje
-{
-    private $db;
 
-    public function __construct()
-    {
-        $this->db = (new Database())->connect();
-    }
+$accion = $_POST['action'] ?? '';
+$selected_noche = $_POST['id_noche'] ?? '';
 
-    public function getNochesActivas()
-    {
-        $sql = "SELECT id_noche, fecha, lugar, numero_noche
-                FROM Noche
-                WHERE deleted_at IS NULL
-                ORDER BY fecha DESC, numero_noche DESC";
-        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    public function getUsuariosActivos()
-    {
-        $sql = "SELECT id_usuario, dni, mail
-                FROM Usuario
-                WHERE deleted_at IS NULL
-                ORDER BY mail ASC";
-        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-    }
 
-    public function getComparsasByNoche($id_noche)
-    {
-        $sql = "SELECT c.id_comparsa, c.nombre
-                FROM noche_comparsa nc
-                JOIN Comparsa c ON c.id_comparsa = nc.id_comparsa
-                WHERE nc.id_noche = ? AND nc.deleted_at IS NULL AND c.deleted_at IS NULL
-                ORDER BY c.nombre ASC";
-        $st = $this->db->prepare($sql);
-        $st->execute([$id_noche]);
-        return $st->fetchAll(PDO::FETCH_ASSOC);
-    }
+    if ($accion === 'cargar_noche') {
+    } elseif ($accion === 'insert_update') {
+        $id_noche     = $_POST['id_noche']     ?? '';
+        $id_comparsa  = $_POST['id_comparsa']  ?? '';
+        $id_categoria = $_POST['id_categoria'] ?? '';
+        $valor        = $_POST['valor_puntaje'] ?? '';
+        $registrado   = $_POST['registrado_por'] ?? '';
 
-    public function getCategoriasByNoche($id_noche)
-    {
-        $sql = "SELECT cat.id_categoria, cat.nombre
-                FROM noche_categoria ncat
-                JOIN Categoria cat ON cat.id_categoria = ncat.id_categoria
-                WHERE ncat.id_noche = ? AND ncat.deleted_at IS NULL AND cat.deleted_at IS NULL
-                ORDER BY cat.nombre ASC";
-        $st = $this->db->prepare($sql);
-        $st->execute([$id_noche]);
-        return $st->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function findIdNocheComparsa($id_noche, $id_comparsa)
-    {
-        $sql = "SELECT id_noche_comparsa
-                FROM noche_comparsa
-                WHERE id_noche = ? AND id_comparsa = ? AND deleted_at IS NULL";
-        $st = $this->db->prepare($sql);
-        $st->execute([$id_noche, $id_comparsa]);
-        $val = $st->fetchColumn();
-        return $val ? (int) $val : null;
-    }
-
-    public function findIdNocheCategoria($id_noche, $id_categoria)
-    {
-        $sql = "SELECT id_noche_categoria
-                FROM noche_categoria
-                WHERE id_noche = ? AND id_categoria = ? AND deleted_at IS NULL";
-        $st = $this->db->prepare($sql);
-        $st->execute([$id_noche, $id_categoria]);
-        $val = $st->fetchColumn();
-        return $val ? (int) $val : null;
-    }
-
-    public function getPuntajesByNoche($id_noche)
-    {
-        $sql = "SELECT 
-                    p.id_puntaje,
-                    p.valor_puntaje,
-                    p.fecha_registro,
-                    c.id_comparsa,
-                    c.nombre AS nombre_comparsa,
-                    cat.id_categoria,
-                    cat.nombre AS nombre_categoria,
-                    u.id_usuario,
-                    u.mail AS registrado_mail,
-                    u.dni AS registrado_dni
-                FROM Puntaje p
-                JOIN noche_comparsa nc ON nc.id_noche_comparsa = p.id_noche_comparsa
-                JOIN Comparsa c ON c.id_comparsa = nc.id_comparsa
-                JOIN noche_categoria ncat ON ncat.id_noche_categoria = p.id_noche_categoria
-                JOIN Categoria cat ON cat.id_categoria = ncat.id_categoria
-                JOIN Usuario u ON u.id_usuario = p.registrado_por
-                WHERE nc.id_noche = ?
-                  AND ncat.id_noche = ?
-                  AND p.deleted_at IS NULL
-                ORDER BY c.nombre ASC, cat.nombre ASC";
-        $st = $this->db->prepare($sql);
-        $st->execute([$id_noche, $id_noche]);
-        return $st->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function addOrUpdate($id_noche, $id_comparsa, $id_categoria, $valor_puntaje, $registrado_por)
-    {
-        if (!is_numeric($valor_puntaje) || $valor_puntaje < 0 || $valor_puntaje > 10) {
-            throw new InvalidArgumentException("El puntaje debe estar entre 0 y 10.");
-        }
-
-        $id_nc = $this->findIdNocheComparsa($id_noche, $id_comparsa);
-        $id_ncat = $this->findIdNocheCategoria($id_noche, $id_categoria);
-
-        if (!$id_nc) {
-            throw new RuntimeException("La comparsa seleccionada no participa en esa noche.");
-        }
-        if (!$id_ncat) {
-            throw new RuntimeException("La categoría seleccionada no está habilitada en esa noche.");
-        }
-
-        $sql_check = "SELECT id_puntaje, deleted_at
-                      FROM Puntaje
-                      WHERE id_noche_comparsa = ? AND id_noche_categoria = ?
-                      LIMIT 1";
-        $st = $this->db->prepare($sql_check);
-        $st->execute([$id_nc, $id_ncat]);
-        $existing = $st->fetch(PDO::FETCH_ASSOC);
-
-        if ($existing) {
-            if (!is_null($existing['deleted_at'])) {
-                $sql_update = "UPDATE Puntaje
-                               SET valor_puntaje = ?, registrado_por = ?,
-                                   deleted_at = NULL, updated_at = CURRENT_TIMESTAMP
-                               WHERE id_puntaje = ?";
-                $st2 = $this->db->prepare($sql_update);
-                $st2->execute([$valor_puntaje, $registrado_por, $existing['id_puntaje']]);
-                return;
-            }
-
-            $sql_update = "UPDATE Puntaje
-                           SET valor_puntaje = ?, registrado_por = ?, updated_at = CURRENT_TIMESTAMP
-                           WHERE id_puntaje = ?";
-            $st2 = $this->db->prepare($sql_update);
-            $st2->execute([$valor_puntaje, $registrado_por, $existing['id_puntaje']]);
-            return;
-        }
-
-        $sql_insert = "INSERT INTO Puntaje
-                       (id_noche_comparsa, id_noche_categoria, valor_puntaje, registrado_por)
-                       VALUES (?, ?, ?, ?)";
-        $st3 = $this->db->prepare($sql_insert);
-        $st3->execute([$id_nc, $id_ncat, $valor_puntaje, $registrado_por]);
-    }
-
-    public function updateValor($id_puntaje, $valor_puntaje)
-    {
-        if (!is_numeric($valor_puntaje) || $valor_puntaje < 0 || $valor_puntaje > 10) {
-            throw new InvalidArgumentException("El puntaje debe estar entre 0 y 10.");
-        }
-        $sql = "UPDATE Puntaje SET valor_puntaje = ?, updated_at = CURRENT_TIMESTAMP WHERE id_puntaje = ?";
-        $st = $this->db->prepare($sql);
-        $st->execute([$valor_puntaje, $id_puntaje]);
-    }
-
-    public function delete($id_puntaje)
-    {
-        $sql = "UPDATE Puntaje SET deleted_at = NOW() WHERE id_puntaje = ?";
-        $st = $this->db->prepare($sql);
-        $st->execute([$id_puntaje]);
-    }
-
-    public function reactivar($id_puntaje)
-    {
-        $sql = "UPDATE Puntaje SET deleted_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id_puntaje = ?";
-        $st = $this->db->prepare($sql);
-        $st->execute([$id_puntaje]);
-    }
-
-    public function resultadosDisponibles($id_noche)
-    {
-        return $this->nocheCompletamenteAprobada($id_noche);
-    }
-
-    public function getResultadosByNoche($id_noche)
-    {
-        $sql = "SELECT 
-                c.nombre AS comparsa,
-                cat.nombre AS categoria,
-                p.valor_puntaje
-            FROM Puntaje p
-            JOIN noche_comparsa nc ON nc.id_noche_comparsa = p.id_noche_comparsa
-            JOIN noche_categoria ncat ON ncat.id_noche_categoria = p.id_noche_categoria
-            JOIN Comparsa c ON c.id_comparsa = nc.id_comparsa
-            JOIN Categoria cat ON cat.id_categoria = ncat.id_categoria
-            JOIN Aprobacion a ON a.id_puntaje = p.id_puntaje
-            WHERE nc.id_noche = ?
-              AND ncat.id_noche = ?
-              AND p.deleted_at IS NULL
-              AND a.estado = 'Aprobado'
-            ORDER BY c.nombre ASC, cat.nombre ASC";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$id_noche, $id_noche]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function nocheCompletamenteAprobada($id_noche)
-    {
-        $sql_delegados = "SELECT COUNT(*) FROM noche_delegado 
-                      WHERE id_noche = ? AND deleted_at IS NULL";
-        $stmt = $this->db->prepare($sql_delegados);
-        $stmt->execute([$id_noche]);
-        $total_delegados = $stmt->fetchColumn();
-
-        if ($total_delegados == 0)
-            return false;
-
-        $sql_ids = "SELECT id_usuario FROM noche_delegado WHERE id_noche = ? AND deleted_at IS NULL";
-        $stmt = $this->db->prepare($sql_ids);
-        $stmt->execute([$id_noche]);
-        $delegados = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-        foreach ($delegados as $id_delegado) {
-            $sql_check = "SELECT COUNT(*) 
-                      FROM Puntaje p
-                      JOIN noche_comparsa nc ON nc.id_noche_comparsa = p.id_noche_comparsa
-                      JOIN noche_categoria ncat ON ncat.id_noche_categoria = p.id_noche_categoria
-                      LEFT JOIN Aprobacion a ON a.id_puntaje = p.id_puntaje AND a.id_usuario = ?
-                      WHERE nc.id_noche = ?
-                        AND ncat.id_noche = ?
-                        AND p.deleted_at IS NULL
-                        AND (a.estado IS NULL OR a.estado != 'Aprobado')";
-            $stmt = $this->db->prepare($sql_check);
-            $stmt->execute([$id_delegado, $id_noche, $id_noche]);
-            $faltantes = $stmt->fetchColumn();
-            if ($faltantes > 0) {
-                return false;
+        if (empty($id_noche) || empty($id_comparsa) || empty($id_categoria) || $valor === '' || empty($registrado)) {
+            $_SESSION['mensaje'] = "Todos los campos son obligatorios.";
+            $_SESSION['tipo_mensaje'] = "danger";
+        } else {
+            try {
+                $puntaje->addOrUpdate($id_noche, $id_comparsa, $id_categoria, (float)$valor, $registrado);
+                $_SESSION['mensaje'] = "Puntaje guardado correctamente.";
+                $_SESSION['tipo_mensaje'] = "success";
+            } catch (Throwable $e) {
+                $_SESSION['mensaje'] = "Error: " . $e->getMessage();
+                $_SESSION['tipo_mensaje'] = "danger";
             }
         }
-
-        return true;
+        $selected_noche = $id_noche;
+    } elseif ($accion === 'delete') {
+        try {
+            $puntaje->delete($_POST['id_puntaje']);
+            $_SESSION['mensaje'] = "Puntaje eliminado.";
+            $_SESSION['tipo_mensaje'] = "danger";
+        } catch (Throwable $e) {
+            $_SESSION['mensaje'] = "Error: " . $e->getMessage();
+            $_SESSION['tipo_mensaje'] = "danger";
+        }
+        $selected_noche = $_POST['id_noche'] ?? '';
+    } elseif ($accion === 'reactivar') {
+        try {
+            $puntaje->reactivar($_POST['id_puntaje']);
+            $_SESSION['mensaje'] = "Puntaje reactivado.";
+            $_SESSION['tipo_mensaje'] = "success";
+        } catch (Throwable $e) {
+            $_SESSION['mensaje'] = "Error: " . $e->getMessage();
+            $_SESSION['tipo_mensaje'] = "danger";
+        }
     }
 }
+
+$noches   = $puntaje->getNochesActivas();
+$usuarios = $puntaje->getUsuariosActivos();
+
+$comparsas = [];
+$categorias = [];
+$puntajes_noche = [];
+
+if (!empty($selected_noche)) {
+    $comparsas = $puntaje->getComparsasByNoche($selected_noche);
+    $categorias = $puntaje->getCategoriasByNoche($selected_noche);
+    $puntajes_noche = $puntaje->getPuntajesByNoche($selected_noche);
+}
+?>
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Puntajes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+
+<body class="bg-dark">
+    <div class="container-fluid px-3 px-md-4 py-4">
+
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-secondary shadow-sm">
+                    <div class="card-body d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 py-3">
+                        <h1 class="h3 mb-0 text-light">
+                            <i class="bi bi-star-fill text-primary me-2"></i>
+                            Gestión de Puntajes
+                        </h1>
+                        <a href="./admin.html" class="btn btn-primary">
+                            <i class="bi bi-house-door-fill me-1"></i> Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <?php if (isset($_SESSION['mensaje'])): ?>
+            <?php $tipo_mensaje = $_SESSION['tipo_mensaje'] ?? 'info'; ?>
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-<?php echo $tipo_mensaje; ?> alert-dismissible fade show shadow-sm" role="alert">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-<?php echo $tipo_mensaje === 'success' ? 'check-circle-fill' : ($tipo_mensaje === 'danger' ? 'exclamation-triangle-fill' : 'info-circle-fill'); ?> fs-4 me-3 flex-shrink-0"></i>
+                            <div class="flex-grow-1">
+                                <strong>Sistema Informa:</strong> <?php echo $_SESSION['mensaje']; ?>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+            <?php unset($_SESSION['mensaje'], $_SESSION['tipo_mensaje']); ?>
+        <?php endif; ?>
+
+        <div class="row g-4">
+
+            <div class="col-12 col-lg-4">
+                <div class="card border-secondary shadow-sm sticky-top" style="top: 1rem;">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-plus-circle-fill me-2"></i>
+                            Cargar / Actualizar Puntaje
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+
+
+                        <form method="POST" class="mb-4">
+                            <input type="hidden" name="action" value="cargar_noche">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="bi bi-moon-stars-fill text-primary me-1"></i> Seleccionar Noche
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <select name="id_noche" class="form-select" required>
+                                        <option value="">-- Seleccione una noche --</option>
+                                        <?php foreach ($noches as $n): ?>
+                                            <option value="<?php echo $n['id_noche']; ?>"
+                                                <?php echo ($selected_noche == $n['id_noche']) ? 'selected' : ''; ?>>
+                                                #<?php echo $n['id_noche']; ?> — <?php echo date('d/m/Y', strtotime($n['fecha'])); ?> (<?php echo htmlspecialchars($n['lugar']); ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <button class="btn btn-secondary" type="submit" title="Cargar comparsas y categorías">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text text-white-50">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Seleccione y actualice para cargar los datos
+                                </div>
+                            </div>
+                        </form>
+
+                        <hr class="border-secondary my-4">
+
+
+                        <?php if (!empty($selected_noche)): ?>
+                            <form method="POST">
+                                <input type="hidden" name="action" value="insert_update">
+                                <input type="hidden" name="id_noche" value="<?php echo $selected_noche; ?>">
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-music-note-list text-primary me-1"></i> Comparsa
+                                    </label>
+                                    <select name="id_comparsa" class="form-select form-select-lg" required>
+                                        <option value="">-- Seleccione comparsa --</option>
+                                        <?php foreach ($comparsas as $c): ?>
+                                            <option value="<?php echo $c['id_comparsa']; ?>">
+                                                <?php echo htmlspecialchars($c['nombre']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-tags-fill text-primary me-1"></i> Categoría
+                                    </label>
+                                    <select name="id_categoria" class="form-select form-select-lg" required>
+                                        <option value="">-- Seleccione categoría --</option>
+                                        <?php foreach ($categorias as $cat): ?>
+                                            <option value="<?php echo $cat['id_categoria']; ?>">
+                                                <?php echo htmlspecialchars($cat['nombre']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-person-check-fill text-primary me-1"></i> Registrado por
+                                    </label>
+                                    <select name="registrado_por" class="form-select form-select-lg" required>
+                                        <option value="">-- Seleccione usuario --</option>
+                                        <?php foreach ($usuarios as $u): ?>
+                                            <option value="<?php echo $u['id_usuario']; ?>">
+                                                <?php echo htmlspecialchars($u['mail']); ?> (DNI: <?php echo htmlspecialchars($u['dni']); ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-123 text-primary me-1"></i> Valor del Puntaje
+                                    </label>
+                                    <input type="number"
+                                        step="0.01"
+                                        min="0"
+                                        max="10"
+                                        name="valor_puntaje"
+                                        class="form-control form-control-lg"
+                                        placeholder="0.00"
+                                        required>
+                                    <div class="form-text text-white-50">
+                                        Ingrese un valor entre 0 y 10 (puede incluir decimales)
+                                    </div>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Guardar Puntaje
+                                    </button>
+                                </div>
+                            </form>
+                        <?php else: ?>
+                            <div class="alert alert-warning d-flex align-items-start mb-0" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill fs-4 me-2 flex-shrink-0"></i>
+                                <div>
+                                    Seleccione una <strong>noche</strong> arriba y haga clic en el botón de actualizar para cargar el formulario.
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-12 col-lg-8">
+                <div class="card border-info shadow-sm">
+                    <div class="card-header bg-info text-white py-3">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">
+                                <i class="bi bi-clipboard-check-fill me-2"></i>
+                                Puntajes de la Noche Seleccionada
+                            </h5>
+                            <span class="badge bg-white text-info fs-6">
+                                <?php echo count($puntajes_noche); ?>
+                            </span>
+                        </div>
+                    </div>
+
+                    <?php if (empty($selected_noche)): ?>
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-arrow-up-circle display-1 text-info opacity-25"></i>
+                            <p class="text-muted mt-3 mb-0">Seleccione una noche arriba para ver sus puntajes</p>
+                        </div>
+                    <?php elseif (empty($puntajes_noche)): ?>
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-inbox display-1 text-muted opacity-25"></i>
+                            <p class="text-muted mt-3 mb-0">Aún no hay puntajes cargados para esta noche</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover table-striped mb-0 align-middle">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th class="text-center" style="width: 70px;">ID</th>
+                                            <th>Comparsa</th>
+                                            <th>Categoría</th>
+                                            <th class="text-center" style="width: 100px;">Valor</th>
+                                            <th>Registrado por</th>
+                                            <th style="width: 150px;">Fecha</th>
+                                            <th class="text-center" style="width: 100px;">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($puntajes_noche as $p): ?>
+                                            <tr>
+                                                <td class="text-center">
+                                                    <span class="badge bg-secondary">#<?php echo $p['id_puntaje']; ?></span>
+                                                </td>
+                                                <td class="fw-semibold">
+                                                    <i class="bi bi-music-note me-1 text-primary"></i>
+                                                    <?php echo htmlspecialchars($p['nombre_comparsa']); ?>
+                                                </td>
+                                                <td>
+                                                    <i class="bi bi-tag me-1 text-info"></i>
+                                                    <?php echo htmlspecialchars($p['nombre_categoria']); ?>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-success fs-6 px-3">
+                                                        <?php echo number_format((float)$p['valor_puntaje'], 2); ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column">
+                                                        <span class="text-white">
+                                                            <i class="bi bi-person-fill me-1 text-warning"></i>
+                                                            <?php echo htmlspecialchars($p['registrado_mail']); ?>
+                                                        </span>
+                                                        <small class="text-white-50">
+                                                            DNI: <?php echo htmlspecialchars($p['registrado_dni']); ?>
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <small class="text-white-50">
+                                                        <i class="bi bi-clock me-1"></i>
+                                                        <?php echo date('d/m/Y H:i', strtotime($p['fecha_registro'])); ?>
+                                                    </small>
+                                                </td>
+                                                <td class="text-center">
+                                                    <form method="POST" class="d-inline">
+                                                        <input type="hidden" name="id_noche" value="<?php echo $selected_noche; ?>">
+                                                        <input type="hidden" name="id_puntaje" value="<?php echo $p['id_puntaje']; ?>">
+                                                        <button type="submit"
+                                                            class="btn btn-danger btn-sm"
+                                                            name="action"
+                                                            value="delete"
+                                                            title="Eliminar puntaje"
+                                                            onclick="return confirm('¿Está seguro de eliminar este puntaje?')">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

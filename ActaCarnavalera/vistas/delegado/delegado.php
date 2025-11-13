@@ -8,8 +8,8 @@ $puntaje = new Puntaje();
 
 
 if (!isset($_SESSION['id_usuario'])) {
- 
-    $_SESSION['id_usuario'] = 2; 
+
+    $_SESSION['id_usuario'] = 2;
 }
 $id_delegado = $_SESSION['id_usuario'];
 
@@ -18,7 +18,6 @@ $selected_noche = $_POST['id_noche'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($accion === 'cargar_noche') {
-        
     } elseif ($accion === 'aprobar' || $accion === 'rechazar') {
         $id_puntaje = $_POST['id_puntaje'] ?? '';
         $justificacion = $_POST['justificacion'] ?? '';
@@ -54,7 +53,10 @@ if (!empty($selected_noche)) {
 </head>
 
 <body class="bg-dark">
+
     <div class="container-fluid px-3 px-md-4 py-4">
+
+
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card border-secondary shadow-sm">
@@ -63,15 +65,17 @@ if (!empty($selected_noche)) {
                             <i class="bi bi-clipboard-check text-primary me-2"></i>
                             Aprobación de Puntajes (Delegado)
                         </h1>
-                        <a href="./dashboard.php" class="btn btn-primary">
-                            <i class="bi bi-house-door-fill me-1"></i> Volver al Inicio
-                        </a>
+                        <button class="btn btn-danger btn-lg shadow-lg" onclick="cerrarSesion()">
+                            <i class="bi bi-box-arrow-right me-2"></i>
+                            <span class="d-none d-sm-inline">Cerrar Sesión</span>
+                            <span class="d-inline d-sm-none">Salir</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        
+
         <?php if (isset($_SESSION['mensaje'])): ?>
             <?php $tipo_mensaje = $_SESSION['tipo_mensaje'] ?? 'info'; ?>
             <div class="row mb-4">
@@ -90,7 +94,7 @@ if (!empty($selected_noche)) {
             <?php unset($_SESSION['mensaje'], $_SESSION['tipo_mensaje']); ?>
         <?php endif; ?>
 
-        
+
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card border-secondary shadow-sm">
@@ -131,7 +135,7 @@ if (!empty($selected_noche)) {
             </div>
         </div>
 
-        
+
         <?php if (!empty($selected_noche)): ?>
             <div class="row">
                 <div class="col-12">
@@ -217,7 +221,7 @@ if (!empty($selected_noche)) {
                                                     </td>
                                                     <td>
                                                         <?php if (!$p['estado_aprobacion']): ?>
-                                                            
+
                                                             <form method="POST" class="mb-2">
                                                                 <input type="hidden" name="id_noche" value="<?php echo $selected_noche; ?>">
                                                                 <input type="hidden" name="id_puntaje" value="<?php echo $p['id_puntaje']; ?>">
@@ -227,7 +231,7 @@ if (!empty($selected_noche)) {
                                                                 </button>
                                                             </form>
 
-                                                            
+
                                                             <div class="card bg-dark border-danger">
                                                                 <div class="card-body p-2">
                                                                     <form method="POST">
@@ -239,11 +243,11 @@ if (!empty($selected_noche)) {
                                                                                 <i class="bi bi-chat-left-text me-1"></i>
                                                                                 Justificación
                                                                             </label>
-                                                                            <textarea name="justificacion" 
-                                                                                      rows="2" 
-                                                                                      class="form-control form-control-sm"
-                                                                                      placeholder="Explique el motivo del rechazo..." 
-                                                                                      required></textarea>
+                                                                            <textarea name="justificacion"
+                                                                                rows="2"
+                                                                                class="form-control form-control-sm"
+                                                                                placeholder="Explique el motivo del rechazo..."
+                                                                                required></textarea>
                                                                         </div>
                                                                         <button type="submit" class="btn btn-danger btn-sm w-100">
                                                                             <i class="bi bi-x-circle-fill me-1"></i> Rechazar
@@ -274,6 +278,13 @@ if (!empty($selected_noche)) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function cerrarSesion() {
+            if (confirm("¿Cerrar sesión?")) {
+                window.location.href = "../../backend/logout.php";
+            }
+        }
+    </script>
 </body>
 
 </html>

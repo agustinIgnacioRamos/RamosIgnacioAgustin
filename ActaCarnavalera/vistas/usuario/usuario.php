@@ -31,10 +31,15 @@ if (!empty($selected_noche)) {
 
 <body class="bg-dark text-light">
     <div class="container py-4">
+        
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h1 class="h3"><i class="bi bi-trophy"></i> Resultados del Carnaval</h1>
-            <a href="../index.html" class="btn btn-primary"><i class="bi bi-house"></i> Inicio</a>
+            <button class="btn btn-danger btn-lg shadow-lg" onclick="cerrarSesion()">
+                <i class="bi bi-box-arrow-right me-2"></i>
+                <span class="d-none d-sm-inline">Cerrar Sesión</span>
+                <span class="d-inline d-sm-none">Salir</span>
+            </button>
         </div>
 
 
@@ -108,6 +113,13 @@ if (!empty($selected_noche)) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      function cerrarSesion() {
+        if (confirm("¿Cerrar sesión?")) {
+          window.location.href = "../../backend/logout.php";
+        }
+      }
+    </script>
 </body>
 
 </html>

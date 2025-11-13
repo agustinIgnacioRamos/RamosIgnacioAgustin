@@ -238,13 +238,13 @@ function mostrarRol($id_rol)
                                 <select name="id_rol" class="form-select form-select-lg" required>
                                     <option value="">Seleccione un rol...</option>
                                     <option value="1"  <?php echo (isset($usuario_a_editar) && $usuario_a_editar['id_rol'] == 1) ? 'selected' : ''; ?>>
-                                        👑 Administrador
+                                         Administrador
                                     </option>
                                     <option value="2"  <?php echo (isset($usuario_a_editar) && $usuario_a_editar['id_rol'] == 2) ? 'selected' : ''; ?>>
-                                        🎯 Delegado
+                                         Delegado
                                     </option>
                                     <option value="3" <?php echo (isset($usuario_a_editar) && $usuario_a_editar['id_rol'] == 3) ? 'selected' : ''; ?>>
-                                        👤 Usuario
+                                         Usuario
                                     </option>
                                 </select>
                             </div>

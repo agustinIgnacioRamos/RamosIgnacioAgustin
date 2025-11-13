@@ -3,6 +3,9 @@ session_start();
 require_once "../../clases/Correccion.php";
 require_once "../../clases/Puntaje.php";
 
+$id_admin = $_SESSION['id_usuario'] ?? null;
+
+
 $correccion = new Correccion();
 $puntaje = new Puntaje();
 
@@ -13,7 +16,6 @@ $selected_noche = $_POST['id_noche'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($accion === 'cargar_noche') {
-     
     } elseif ($accion === 'aceptar') {
         $id_puntaje = $_POST['id_puntaje'];
         $id_aprobacion = $_POST['id_aprobacion'];
@@ -64,7 +66,7 @@ if (!empty($selected_noche)) {
 <body class="bg-dark">
     <div class="container-fluid px-3 px-md-4 py-4">
 
-       
+
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card border-secondary shadow-sm">
@@ -81,7 +83,7 @@ if (!empty($selected_noche)) {
             </div>
         </div>
 
-     
+
         <?php if (isset($_SESSION['mensaje'])): ?>
             <?php $tipo_mensaje = $_SESSION['tipo_mensaje'] ?? 'info'; ?>
             <div class="row mb-4">
@@ -100,7 +102,7 @@ if (!empty($selected_noche)) {
             <?php unset($_SESSION['mensaje'], $_SESSION['tipo_mensaje']); ?>
         <?php endif; ?>
 
-     
+
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card border-secondary shadow-sm">
@@ -141,7 +143,7 @@ if (!empty($selected_noche)) {
             </div>
         </div>
 
-      
+
         <?php if (!empty($selected_noche)): ?>
             <div class="row">
                 <div class="col-12">
@@ -207,7 +209,7 @@ if (!empty($selected_noche)) {
                                                         </div>
                                                     </td>
                                                     <td>
-                                                       
+
                                                         <div class="card bg-dark border-success mb-2">
                                                             <div class="card-body p-3">
                                                                 <form method="POST">
@@ -248,7 +250,7 @@ if (!empty($selected_noche)) {
                                                             </div>
                                                         </div>
 
-                                                        
+
                                                         <div class="card bg-dark border-danger">
                                                             <div class="card-body p-3">
                                                                 <form method="POST">

@@ -200,7 +200,7 @@ if (!empty($selected_noche)) {
                                                     </td>
                                                     <td>
                                                         <div class="alert alert-warning mb-0 py-2 px-3" role="alert">
-                                                            <small class="text-dark">
+                                                            <small class="text-light">
                                                                 <i class="bi bi-chat-left-quote me-1"></i>
                                                                 <?php echo htmlspecialchars($r['justificacion_delegado']); ?>
                                                             </small>

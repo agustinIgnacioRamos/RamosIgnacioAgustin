@@ -1,0 +1,177 @@
+-- CREAR BASE DE DATOS
+
+CREATE DATABASE acta_carnavalera
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_general_ci;
+USE acta_carnavalera;
+
+
+-- TABLA: Rol
+
+CREATE TABLE Rol (
+  id_rol INT AUTO_INCREMENT PRIMARY KEY,
+  nombre_rol VARCHAR(50) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL
+);
+
+-- Roles iniciales
+INSERT INTO Rol (nombre_rol) VALUES ('Administrador'), ('Delegado'), ('Usuario');
+
+
+-- TABLA: Usuario
+
+CREATE TABLE Usuario (
+  id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+  dni VARCHAR(20) NOT NULL UNIQUE,
+  mail VARCHAR(100) NOT NULL UNIQUE,
+  contrasena VARCHAR(255) NOT NULL,
+  id_rol INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  FOREIGN KEY (id_rol) REFERENCES Rol(id_rol)
+);
+
+-- TABLA: Comparsa
+
+CREATE TABLE Comparsa (
+  id_comparsa INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL UNIQUE,
+  id_director INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  FOREIGN KEY (id_director) REFERENCES Usuario(id_usuario)
+);
+
+
+-- TABLA: Noche
+
+CREATE TABLE Noche (
+  id_noche INT AUTO_INCREMENT PRIMARY KEY,
+  fecha DATE NOT NULL,
+  lugar VARCHAR(150) NOT NULL,
+  numero_noche INT NOT NULL,
+  detalles TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  UNIQUE(fecha, numero_noche)
+);
+
+
+-- TABLA: Categoria
+
+CREATE TABLE Categoria (
+  id_categoria INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL UNIQUE,
+  descripcion TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL
+);
+
+
+-- TABLA: Noche_Comparsa (Relaci�n N:N entre Noche y Comparsa)
+
+CREATE TABLE Noche_Comparsa (
+  id_noche_comparsa INT AUTO_INCREMENT PRIMARY KEY,
+  id_noche INT NOT NULL,
+  id_comparsa INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  UNIQUE (id_noche, id_comparsa),
+  FOREIGN KEY (id_noche) REFERENCES Noche(id_noche),
+  FOREIGN KEY (id_comparsa) REFERENCES Comparsa(id_comparsa)
+);
+
+
+-- TABLA: Noche_Categoria (Relaci�n N:N entre Noche y Categor�a)
+
+CREATE TABLE Noche_Categoria (
+  id_noche_categoria INT AUTO_INCREMENT PRIMARY KEY,
+  id_noche INT NOT NULL,
+  id_categoria INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  UNIQUE (id_noche, id_categoria),
+  FOREIGN KEY (id_noche) REFERENCES Noche(id_noche),
+  FOREIGN KEY (id_categoria) REFERENCES Categoria(id_categoria)
+);
+
+
+-- TABLA: Puntaje 
+
+CREATE TABLE Puntaje (
+  id_puntaje INT AUTO_INCREMENT PRIMARY KEY,
+  id_noche_comparsa INT NOT NULL,
+  id_noche_categoria INT NOT NULL,
+  valor_puntaje DECIMAL(4,2) NOT NULL CHECK (valor_puntaje BETWEEN 0 AND 10),
+  registrado_por INT NOT NULL,
+  fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  UNIQUE (id_noche_comparsa, id_noche_categoria),
+  FOREIGN KEY (id_noche_comparsa) REFERENCES Noche_Comparsa(id_noche_comparsa),
+  FOREIGN KEY (id_noche_categoria) REFERENCES Noche_Categoria(id_noche_categoria),
+  FOREIGN KEY (registrado_por) REFERENCES Usuario(id_usuario)
+);
+
+
+-- TABLA: Correccion 
+
+CREATE TABLE Correccion (
+  id_correccion INT AUTO_INCREMENT PRIMARY KEY,
+  id_puntaje INT NOT NULL,
+  id_usuario INT NOT NULL, -- administrador que corrige
+  detalle_modificacion TEXT NOT NULL,
+  fecha_correccion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  FOREIGN KEY (id_puntaje) REFERENCES Puntaje(id_puntaje),
+  FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+
+-- TABLA: Aprobacion (estado delegado)
+
+CREATE TABLE Aprobacion (
+  id_aprobacion INT AUTO_INCREMENT PRIMARY KEY,
+  id_puntaje INT NOT NULL,
+  id_usuario INT NOT NULL, -- delegado
+  estado ENUM('Aprobado','Rechazado') NOT NULL,
+  criterio_desacuerdo VARCHAR(255),
+  justificacion TEXT,
+  fecha_aprobacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  FOREIGN KEY (id_puntaje) REFERENCES Puntaje(id_puntaje),
+  FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+-- TABLA: noche_delegado
+
+CREATE TABLE noche_delegado (
+  id_noche_delegado INT AUTO_INCREMENT PRIMARY KEY,
+  id_noche INT NOT NULL,
+  id_usuario INT NOT NULL, -- el delegado
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  CONSTRAINT fk_nd_noche FOREIGN KEY (id_noche) REFERENCES Noche(id_noche),
+  CONSTRAINT fk_nd_usuario FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario),
+  UNIQUE (id_noche, id_usuario)
+);
+
+
+
+
+
+
